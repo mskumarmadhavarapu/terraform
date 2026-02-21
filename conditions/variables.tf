@@ -1,3 +1,8 @@
+variable "environment" {
+    default     = "dev"
+}
+
+
 variable "ami_id" {
     type        = string
     default     = "ami-0220d79f3f480ecf5"
@@ -22,10 +27,6 @@ variable "ec2_tags" {
 variable "sg_name" {
     type        = string
     default     = "allow-all-terraform"
-<<<<<<< HEAD
-=======
-    default     = "allow-all-terraform-default"
->>>>>>> 0ce3797 (all)
 }
 
 variable "sg_description" {
