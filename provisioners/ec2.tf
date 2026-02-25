@@ -2,14 +2,54 @@ resource "aws_instance" "example" {
     ami                 = "ami-0220d79f3f480ecf5"
     instance_type       = "t3.micro"
     vpc_security_group_ids = [aws_security_group.allow_tls.id]
-    
-    tags = {
-        Name = "terraform"
-        Project = "roboshop"
+
+  # self is the special variable
+  provisioner "local-exec" {
+    command = "echo ${self.public_ip} > inventory.ini" 
+  }
+
+  # run scripts in provisioners
+  provisioner "local-exec" {
+    command = "echo script-2" 
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "echo 'Deleting the instance'" 
+  }
+
+   provisioner "local-exec" {
+    when    = destroy
+    command = "echo > inventory.ini" 
+  }
+
+  connection {
+    type    = "ssh"
+    user    = "ec2-user"
+    password = "DevOps321"
+    host     = self.public_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo dnf install nginx -y",
+      "sudo systemctl start nginx"] # Commands to run
+  }
+
+   provisioner "remote-exec" {
+    inline = [
+      "sudo systemctl stop nginx"
+    ] 
+    when = destroy
+  }
+
+  tags = {
+    Name = "provisioners.demo"
+    Project = "roboshop"
   }
 }
 resource "aws_security_group" "allow_tls" {
-  name        = "allow-all-terraform" # this for aws account
+  name        = "allow-all-provisioners.demo" # this for aws account
   description = "Allow TLS inbound traffic and all outbound traffic"
   
   egress {
@@ -29,6 +69,6 @@ resource "aws_security_group" "allow_tls" {
   }
 
   tags = {
-    Name = "allow-all-terraform"
+    Name = "allow-all-provisioners.demo"
   }
 }
